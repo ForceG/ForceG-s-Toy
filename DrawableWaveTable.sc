@@ -221,8 +221,8 @@ DrawableWaveTable{
 
 	dynBuffer{|n|var i=n;
 		if(i.isNil){i=tableNumber.value};
-		if(dynBuffer[i].isNil){dynBuffer[i]=Buffer.alloc(server ,tables[i][2],1)};
-		if(dynBuffer[i].bufnum.isNil){dynBuffer[i]=Buffer.alloc(server ,tables[i][2],1)};
+		if(dynBuffer[i].isNil){dynBuffer[i]=this.asBuffer(i)};
+		if(dynBuffer[i].bufnum.isNil){dynBuffer[i]=this.asBuffer(i)};
 		^dynBuffer[i]
 	}
 

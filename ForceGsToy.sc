@@ -1,8 +1,8 @@
 ForceGsToy{
-	var <bus,<window,table;
+	var <bus,<window,<table;
 
 	*new{
-		super.new.init()
+		^super.new.init()
 	}
 
 	init{
@@ -46,6 +46,7 @@ ForceGsToy{
 			ens[0].setColors(numBackground:Color.grey(0.25),numNormalColor:Color.hsv(col[i].asHSV[0],0.5,1));
 			ens[1].setColors(numBackground:Color.grey(0.25),numNormalColor:Color.hsv(col[i].asHSV[0],0.5,1));
 		});
+
 		table=DrawableWaveTable(window,Rect(1,562,330,150));
 		table.eText.stringColor=Color.white;
 		table.interText.stringColor=Color.white;
