@@ -152,6 +152,23 @@ DrawableWaveTable{
 			simpleTable=this.rdp(table,e.value,0,samples-1);
 			Pen.strokeColor = Color.hsv(0.6,0.1,1);
 			Pen.moveTo((simpleTable[0].x*v.bounds.width)@(1-simpleTable[0].y*v.bounds.height));
+
+			if(e.value>0){(simpleTable.size-1).do{|i|var p=simpleTable[i],np=simpleTable[i+1];
+					(np.x-p.x).do{|i2|
+						switch(interText.string.asSymbol,
+						"---".asSymbol,{Pen.lineTo((p.x+i2/(samples)*v.bounds.width)@(1-p.y*v.bounds.height))},
+						\lin,{Pen.lineTo((p.x+i2/(samples)*v.bounds.width)@(1-(i2*(np.y-p.y)/(np.x-p.x)+p.y)*v.bounds.height))},
+						\exp,{var x=i2/(np.x-p.x); Pen.lineTo((p.x+i2/(samples)*v.bounds.width)@(1-
+							(x*(exp(x.neg+1*1.15).neg+2) + (exp(x*1.15)-1*(1-x))*(np.y-p.y)+p.y)   *v.bounds.height))},
+						\sin,{Pen.lineTo((p.x+i2/(samples)*v.bounds.width)@(1-(cos( i2*pi/(np.x-p.x) )-1/(-2)*(np.y-p.y)+p.y)*v.bounds.height))},
+						\sqr,{var x=i2/(np.x-p.x); Pen.lineTo((p.x+i2/(samples)*v.bounds.width)@
+							(1-( x*(((x-1)**2).neg+1) + (x**2*(1-x)) * (np.y-p.y) +p.y )  *v.bounds.height))},
+						\cub,{var x=i2/(np.x-p.x); Pen.lineTo((p.x+i2/(samples)*v.bounds.width)@(1- ( x*(abs(x-1**3).neg+1) +(abs(x**3)*(1-x)) *(np.y-p.y) +p.y) *v.bounds.height))},
+				)}
+			};
+			Pen.lineTo(v.bounds.width@(1-simpleTable[0].y*v.bounds.height));
+			Pen.stroke};
+			/*
 			(simpleTable.size-1).do{|i|
 				switch((interText.string.asSymbol),
 					"---".asSymbol,{Pen.lineTo((simpleTable[i+1].x/(samples)*v.bounds.width)@(1-simpleTable[i].y*v.bounds.height));
@@ -162,9 +179,7 @@ DrawableWaveTable{
 					p2=(simpleTable[i+1].x/(samples)*v.bounds.width)@(1-simpleTable[i+1].y*v.bounds.height);
 					Pen.curveTo(p2,(p1.x+p2.x)/2@(p1.y),(p1.x+p2.x)/2@(p2.y))
 				}};
-
-			Pen.lineTo(v.bounds.width@(1-simpleTable[0].y*v.bounds.height));
-			Pen.stroke;
+			*/
 
 			Pen.strokeColor = Color.hsv(0.1,1,1);
 			Pen.moveTo(0@table[0]);
@@ -200,10 +215,10 @@ DrawableWaveTable{
 
 	table_ {|val|table=val;this.refresh()}
 
-	asBuffer{|server,n,action=nil|var
-		argN=if(n.isNil){n=tableNumber.value}{n};
+	asBuffer{|n,server|var
+		argN=if(n.isNil){tableNumber.value}{n};
 		if(server.isNil){server=Server.default};
-		^Buffer.sendCollection(server,tables[argN][0][..tables[argN][2]-1],1,action:action)
+		^Buffer.sendCollection(server,tables[argN][0][..tables[argN][2]-1],1)
 	}
 
 	asEnv{|t=1,n|var curve=\hold,lastP=0,levels=[],times=[],
@@ -292,12 +307,22 @@ DrawableWaveTable{
 				if(v.samplesNum.value!=tables[tableNumber.value][2]){v.samplesNum.value=tables[tableNumber.value][2]};
 				if(v.e.value!=tables[tableNumber.value][3]){v.e.value=tables[tableNumber.value][3]};
 				v.userView.refresh}};
-		if(dynBuffer[tableNumber.value].notNil){if(dynBuffer[tableNumber.value].bufnum.notNil){
+		if(dynBuffer[tableNumber.value].notNil){if(dynBuffer[tableNumber.value].bufnum.notNil){var interTable=table.copy;
 			if(dynBuffer[tableNumber.value].numFrames!=samples){
 				dynBuffer[tableNumber.value].numFrames=samples;
 				dynBuffer[tableNumber.value].alloc};
-			dynBuffer[tableNumber.value].setn(0,table)}}
-	}
-
+			if(e.value>0){var simpleTable=this.rdp(table,e.value,0,samples);
+				(simpleTable.size-1).do{|i|var p=simpleTable[i],np=simpleTable[i+1];
+					(np.x-p.x).do{|i2|
+						switch(interText.string.asSymbol,
+							"---".asSymbol,{interTable[p.x+i2]=p.y},
+							\lin,{interTable[p.x+i2]=i2*(np.y-p.y)/(np.x-p.x)+p.y},
+							\exp,{var x=i2/(np.x-p.x);interTable[p.x+i2]=(x*(exp(x.neg+1*1.15).neg+2) + (exp(x*1.15)-1*(1-x))*(np.y-p.y)+p.y)},
+							\sin,{interTable[p.x+i2]=cos( i2*pi/(np.x-p.x) )-1/(-2)*(np.y-p.y)+p.y},
+							\sqr,{var x=i2/(np.x-p.x);interTable[p.x+i2]= x*(((x-1)**2).neg+1) + (x**2*(1-x)) * (np.y-p.y) +p.y },
+							\cub,{var x=i2/(np.x-p.x);interTable[p.x+i2]=  x*(abs(x-1**3).neg+1) +(abs(x**3)*(1-x)) *(np.y-p.y) +p.y},
+					)}
+			}};
+			dynBuffer[tableNumber.value].setn(0,interTable)}
+	}}
 }
-
