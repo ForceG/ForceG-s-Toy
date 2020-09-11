@@ -14,7 +14,7 @@ ForceGsToy{
 
 		32.do({|i|var knob;
 			bus=bus[asSymbol("knob"++floor(i/8).asInteger++(i%8))]=Bus.control;
-			knob=EZKnob(window,Rect(i%8*50,floor(i/8)*70,50,70),action:{|knob|bus[asSymbol("knob"++i)].set(knob.value)});
+			knob=EZKnob(window,Rect(i%8*50,floor(i/8)*70,50,70),action:{|knob|bus[asSymbol("knob"++floor(i/8).asInteger++(i%8))].set(knob.value)});
 			knob.setColors(
 				nil,nil,Color.grey(0.25),nil,Color.hsv(1/8*(i%8),0.5,1),
 				background:Color.black,
@@ -27,12 +27,12 @@ ForceGsToy{
 				nil,Color.hsv(1/8*(i%8),0.5,1),Color.white,Color.hsv(1/8*(i%8),0.3,0.8));
 		slid.sliderView.mouseDownAction_({|v,x,y,m,b,c|if(c==2){(if(slid.controlSpec.minval==1.neg){slid.controlSpec.minval=0}{slid.controlSpec.minval=(-1)})}})});
 		8.do({|i|var slid;bus=bus[asSymbol("slider"++(i+8))]=Bus.control;
-			slid=EZSlider(window,Rect(i*25+200,280,25,160),layout:\vert,action:{|knob|bus[asSymbol("slider"++i)].set(knob.value)}).setColors(
+			slid=EZSlider(window,Rect(i*25+200,280,25,160),layout:\vert,action:{|knob|bus[asSymbol("slider"++(i+8))].set(knob.value)}).setColors(
 				nil,nil,Color.hsv(1/8*(i%8),0.5,0.5),Color.grey(0.25),
 				nil,Color.hsv(1/8*(i%8),0.5,1),Color.white,Color.hsv(1/8*(i%8),0.3,0.8));
 			slid.sliderView.mouseDownAction_({|v,x,y,m,b,c|if(c==2){(if(slid.controlSpec.minval==(-1)){slid.controlSpec.minval=0}{slid.controlSpec.minval=(-1)})}})});
 		4.do({|i|var ens,s,col=[Color(0.45,0.3,0.3),Color(0.3,0.45,0.3),Color(0.45,0.45,0.3),Color(0.3,0.3,0.45)],
-			busX=bus[asSymbol("pad"++(i)++"X")]=Bus.control,busY=bus[asSymbol("pad"++(i+8)++"Y")]=Bus.control;
+			busX=bus[asSymbol("pad"++(i)++"X")]=Bus.control,busY=bus[asSymbol("pad"++(i)++"Y")]=Bus.control;
 			ens = [EZNumber(window,Rect(i*100,540,50,20)),EZNumber(window,Rect(i*100+50,540,50,20))];
 			s=Slider2D(window,Rect(i*100,440,100,100)).action={
 				|knob|
