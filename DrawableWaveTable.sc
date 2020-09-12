@@ -105,7 +105,7 @@ DrawableWaveTable{
 			}{
 				pasteButton.states_([["P",Color.black,Color.white]]);
 				switch(wavText.string[..2].asSymbol,
-					\usr,{samples.do{|i|table[i]=tables[wavText.string[3..].asInteger][0][i]};
+					\usr,{samples.do{|i|tables[tableNumber.value][0][i]=tables[wavText.string[3..].asInteger][0][i]};
 						tables[tableNumber.value][1]=tables[wavText.string[3..].asInteger][1];
 						tables[tableNumber.value][2]=tables[wavText.string[3..].asInteger][2];
 						tables[tableNumber.value][3]=tables[wavText.string[3..].asInteger][3]	},
@@ -195,14 +195,14 @@ DrawableWaveTable{
 
 		userView.mouseMoveAction={|v,x,y|
 			if( (0<=x)&&(x<=(v.bounds.width-1))&&(0<=y)&&(y<=v.bounds.height) ){
-				table[(x/v.bounds.width*samples).floor] = 1-(y/v.bounds.height);
+				tables[tableNumber.value][0][(x/v.bounds.width*samples).floor] = 1-(y/v.bounds.height);
 				if(mouseInterButton.value==1){
 					if(this.lastDrawPos.notNil){if(this.lastDrawPos.x-x!=0){var lastIx=this.lastDrawPos.x; for(this.lastDrawPos.x,x){
 						|ix|( abs((ix/v.bounds.width*samples).floor-(lastIx/v.bounds.width*samples).floor)+1 ).do{|interI|var addI=interI;
 							if(y-lastDrawPos.y!=0){
 								if(x<this.lastDrawPos.x){addI=interI.neg+1};
-								table[(ix/v.bounds.width*samples+addI).floor%512] = 1-( (y-this.lastDrawPos.y)*((ix+addI)-lastDrawPos.x/(x-lastDrawPos.x))+this.lastDrawPos.y/v.bounds.height)}
-							{table[(ix/v.bounds.width*samples+addI).floor%512] = 1-(y/v.bounds.height)};
+								tables[tableNumber.value][0][(ix/v.bounds.width*samples+addI).floor%512] = 1-( (y-this.lastDrawPos.y)*((ix+addI)-lastDrawPos.x/(x-lastDrawPos.x))+this.lastDrawPos.y/v.bounds.height)}
+							{tables[tableNumber.value][0][(ix/v.bounds.width*samples+addI).floor%512] = 1-(y/v.bounds.height)};
 						};
 						lastIx=ix
 					}}};
