@@ -82,13 +82,13 @@ ForceGsToy{
 						bus[("button"++(iter_x-1)++iter_y).asSymbol].set(1);
 						if(buttonDownAction[(""++(iter_x-1)++iter_y).asSymbol].notNil){buttonDownAction[(""++(iter_x-1)++iter_y).asSymbol].(v)};
 						nil }};
-				newButton.mouseUpAction_{|v|if(buttonUpAction[(""++(iter_x-1)++iter_y).asSymbol].notNil){buttonUpAction[(""++(iter_x-1)++iter_y).asSymbol].(v)}; nil};
+				newButton.mouseUpAction_{|v,x,y|if(buttonUpAction[(""++(iter_x-1)++iter_y).asSymbol].notNil&&(0<x)&&(x<15)&&(0<x)&&(x<15)){buttonUpAction[(""++(iter_x-1)++iter_y).asSymbol].(v)}; nil};
 				newButton.mouseLeaveAction_{|v, x, y|
 					v.value=0;
 					bus[("button"++(iter_x-1)++iter_y).asSymbol].set(0); nil };
 			}{if(iter_x>0){
 				bus[("ioButton"++(iter_x-1)++(iter_y-5)).asSymbol]=Bus.control();
-				newButton.action_{|v|bus[("ioButton"++(iter_x-1)++(iter_y-5)).asSymbol].set(v.value);if(ioButtonAction[(""++(iter_x-1)++iter_y).asSymbol].notNil){ioButtonAction[(""++(iter_x-1)++iter_y).asSymbol].(v)}};
+				newButton.action_{|v|bus[("ioButton"++(iter_x-1)++(iter_y-5)).asSymbol].set(v.value);if(ioButtonAction[(""++(iter_x-1)++(iter_y-5)).asSymbol].notNil){ioButtonAction[(""++(iter_x-1)++(iter_y-5)).asSymbol].(v)}};
 				newButton.states_( [ ["0",Color.hsv((iter_y-5)/5,0.8,0.9),Color.hsv((iter_y-5)/5,1,0.5)], ["|",Color.hsv((iter_y-5)/5,1,0.5),Color.hsv((iter_y-5)/5,0.8,0.9)] ])
 			}{
 				bus[("sweeper"++iter_y++"X").asSymbol]=Bus.control();
@@ -109,4 +109,8 @@ ForceGsToy{
 			button=button.add(newButton);
 		}};
 	}
+
+	hide{window.visible=false}
+	front{window.front}
+	close{window.close}
 }
