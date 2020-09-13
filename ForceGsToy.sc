@@ -111,6 +111,6 @@ ForceGsToy{
 	}
 
 	hide{window.visible=false}
-	front{window.front}
+	show{window.front}
 	close{window.close}
 }
