@@ -7,7 +7,7 @@ ForceGsToy{
 
 	init{
 		bus= Dictionary(0);
-		window = Window(\myWindow,Rect(1038,157,400,713));
+		window = Window("ForceG's Toy",Rect(1038,157,400,713));
 		window.visible = true;
 		window.alwaysOnTop=true;
 		window.background=Color.black;
