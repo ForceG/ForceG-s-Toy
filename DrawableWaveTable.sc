@@ -326,7 +326,7 @@ DrawableWaveTable{
 		if(dynBuffer[tableNumber.value].notNil){if(dynBuffer[tableNumber.value].bufnum.notNil){var interTable=table.copy;
 			if(dynBuffer[tableNumber.value].numFrames!=samples){
 				dynBuffer[tableNumber.value].numFrames=samples;
-				dynBuffer[tableNumber.value].alloc({TemposClock.default.sched(0.01,{this.refresh})})};
+				dynBuffer[tableNumber.value].alloc({AppClock.sched(0.01,{this.refresh})})};
 			if(e.value>0) {var simpleTable=(this.rdp(table,e.value**2,0,samples-1)++tables[tableNumber.value][4]).sort{|a,b|a.x<b.x};
 				(simpleTable.size-1).do{|i|var p=simpleTable[i],np=simpleTable[i+1];
 					if(p.x==np.x){}
