@@ -1,5 +1,5 @@
 ForceGsToy{
-	var <bus,<window,<table,<knob,<slider,<pad,<padx,<pady,<button,lastMousePos,<buttonDownAction,<buttonUpAction,<ioButtonAction;
+	var <bus,<window,<table,<knob,<slider,<pad,<padx,<pady,<button,lastMousePos,<buttonDownAction,<buttonUpAction,<ioButtonAction,<sweepAction;
 
 	*new{
 		^super.new.init()
@@ -21,6 +21,7 @@ ForceGsToy{
 		buttonDownAction=Dictionary(0);
 		buttonUpAction=Dictionary(0);
 		ioButtonAction=Dictionary(0);
+		sweepAction=Dictionary(0);
 
 		32.do({|i|var knob;
 			bus=bus[asSymbol("knob"++floor(i/8).asInteger++(i%8))]=Bus.control;
@@ -101,6 +102,9 @@ ForceGsToy{
 				if(lastMousePos.notNil){
 					bus[("sweeper"++iter_y++"X").asSymbol].set(bus[("sweeper"++iter_y++"X").asSymbol].getSynchronous()+(x-lastMousePos[0]/100));
 					bus[("sweeper"++iter_y++"Y").asSymbol].set(bus[("sweeper"++iter_y++"Y").asSymbol].getSynchronous()-(y-lastMousePos[1]/100));
+					if(sweepAction[iter_y.asSymbol].notNil){sweepAction[iter_y.asSymbol].(v,
+						bus[("sweeper"++iter_y++"X").asSymbol].getSynchronous(),bus[("sweeper"++iter_y++"Y").asSymbol].getSynchronous(),
+						x-lastMousePos[0]/100,y-lastMousePos[0]/100	)};
 					lastMousePos=[x,y] }};
 			newButton.action_{lastMousePos=nil};
 			button=button.add(newButton);
