@@ -1,5 +1,5 @@
 DrawableWaveTable{
-	var <parent,<bounds,<>samples,<userView,<samplesNum,<e,<table,<eText,<samplesText,<copyButton,<pasteButton;
+	var <parent,<bounds,<>samples,<userView,<samplesNum,<e,<eText,<table,<samplesText,<copyButton,<pasteButton;
 	var <tableUpButton,<tableDownButton,<tableNumber,<smoothButton,<wavButton,<interButton,<normalizeButton,<mouseInterButton;
 	var <>tables,<>envs,tableI,<interText,<wavText,<>lastDrawPos=nil,<newWindowButton;
 	var <>linkedTables,dynBuffer,server,but0;
@@ -13,7 +13,7 @@ DrawableWaveTable{
 
 		^super.new.init(argParent,argBounds,samples,argServer);
 	}
-	init{|argParent,argBounds,argSamples,argServer|
+	init{|argParent,argBounds,argSamples,argServer| var table = [];
 		parent = argParent;
 		server = argServer;
 		bounds = argBounds;
@@ -31,7 +31,7 @@ DrawableWaveTable{
 			Rect(bounds.left+(bounds.width*0.92),bounds.top,bounds.width*0.08,bounds.height*0.1));
 		e.controlSpec.step=0.001;
 		e.action={tables[tableNumber.value][3]=e.value;this.refresh()};
-		table = [];
+
 		linkedTables=[this];
 		tables=[];
 		dynBuffer=[];
@@ -111,12 +111,12 @@ DrawableWaveTable{
 						tables[tableNumber.value][2]=tables[wavText.string[3..].asInteger][2];
 						tables[tableNumber.value][3]=tables[wavText.string[3..].asInteger][3];
 						tables[tableNumber.value][4]=tables[wavText.string[3..].asInteger][4] },
-					\sin,{samples.do{|i|table[i]=sin(2*pi/samples*i)/2+0.5}},
-					\saw,{samples.do{|i|table[i]=i/(samples-1)}},
-					\sqr,{samples.do{|i|table[i]=(i/(samples-1)+0.5).floor}},
-					\rnd,{samples.do{|i|table[i]=1.0.rand}},
-					\flt,{samples.do{|i|table[i]=0.5}},
-					"___".asSymbol,{samples.do{|i|table[i]=0}} );
+					\sin,{samples.do{|i|tables[tableNumber.value][0][i]=sin(2*pi/samples*i)/2+0.5}},
+					\saw,{samples.do{|i|tables[tableNumber.value][0][i]=i/(samples-1)}},
+					\sqr,{samples.do{|i|tables[tableNumber.value][0][i]=(i/(samples-1)+0.5).floor}},
+					\rnd,{samples.do{|i|tables[tableNumber.value][0][i]=1.0.rand}},
+					\flt,{samples.do{|i|tables[tableNumber.value][0][i]=0.5}},
+					"___".asSymbol,{samples.do{|i|tables[tableNumber.value][0][i]=0}} );
 				this.refresh;
 			};
 		}).mouseLeaveAction_({pasteButton.states_([["P",Color.black,Color.white]])});
@@ -151,7 +151,7 @@ DrawableWaveTable{
 		});
 
 		userView.drawFunc = { |v|var
-			simpleTable=(this.rdp(table,e.value**2,0,samples-1)++tables[tableNumber.value][4]).sort{|a,b|a.x<b.x};
+			simpleTable=(this.rdp(tables[tableNumber.value][0],e.value**2,0,samples-1)++tables[tableNumber.value][4]).sort{|a,b|a.x<b.x};
 			Pen.strokeColor = Color.hsv(0.6,0.1,1);
 			Pen.moveTo((simpleTable[0].x*v.bounds.width)@(1-simpleTable[0].y*v.bounds.height));
 
@@ -186,7 +186,7 @@ DrawableWaveTable{
 			Pen.strokeColor = Color.hsv(0.1,1,1);
 			Pen.moveTo(0@table[0]);
 			(samples+1).do(){|i|
-				Pen.lineTo((v.bounds.width/(samples)*(i))@(1-table[(i%samples)]*v.bounds.height));
+				Pen.lineTo((v.bounds.width/(samples)*(i))@(1-tables[tableNumber.value][0][(i%samples)]*v.bounds.height));
 			};
 			Pen.stroke;
 
@@ -239,7 +239,7 @@ DrawableWaveTable{
 
 	asEnv{|t=1,n|var curve=\hold,lastP=0,levels=[],times=[],
 		argN=if(n.isNil){n=tableNumber.value}{n},
-		newTable = (this.rdp(table,e.value**2,0,samples-1)++tables[tableNumber.value][4]).sort{|a,b|a.x<b.x};
+		newTable = (this.rdp(tables[tableNumber.value][0],e.value**2,0,samples-1)++tables[tableNumber.value][4]).sort{|a,b|a.x<b.x};
 		if(tables[argN][1].asSymbol!="---".asSymbol){
 			curve=tables[tableNumber.value][1]};
 		newTable.do{|p|
@@ -327,7 +327,7 @@ DrawableWaveTable{
 			if(dynBuffer[tableNumber.value].numFrames!=samples){
 				dynBuffer[tableNumber.value].numFrames=samples;
 				dynBuffer[tableNumber.value].alloc({AppClock.sched(0.01,{this.refresh})})};
-			if(e.value>0) {var simpleTable=(this.rdp(table,e.value**2,0,samples-1)++tables[tableNumber.value][4]).sort{|a,b|a.x<b.x};
+			if(e.value>0) {var simpleTable=(this.rdp(tables[tableNumber.value][0],e.value**2,0,samples-1)++tables[tableNumber.value][4]).sort{|a,b|a.x<b.x};
 				(simpleTable.size-1).do{|i|var p=simpleTable[i],np=simpleTable[i+1];
 					if(p.x==np.x){}
 					{(np.x-p.x).do{|i2|
@@ -343,11 +343,63 @@ DrawableWaveTable{
 			dynBuffer[tableNumber.value].setn(0,interTable)}
 	}}
 
+
+	load{|num,path,server|
+		if(server.isNil){server=Server.default};
+		if(dynBuffer[num].notNil){
+			//dynBuffer[num].numFrames=nil;
+			dynBuffer[num].read(server,path);
+			//dynBuffer[num].alloc({AppClock.sched(0.01,{this.refresh;})})
+		};
+		Buffer.read(server,path,action:{|buf|
+			buf.numFrames.do{|i|
+				buf.get(i,{|val|tables[num][0][i]=val})};
+			buf.free;
+			AppClock.sched(0.5,{this.refresh})});
+		Buffer.read(server,path++".prop",action:{|buf|var swap;
+			buf.get(0,{|x|switch(((x*10).round/10),
+				0.9,{this.tables[num][1]="---".asSymbol},
+				0.1,{this.tables[num][1]=\lin},
+				0.2,{this.tables[num][1]=\exp},
+				0.3,{this.tables[num][1]=\sin},
+				0.4,{this.tables[num][1]=\sqr},
+				0.5,{this.tables[num][1]=\cub})});
+			buf.get(1,{|x|tables[num][2]=x*512});
+			buf.get(2,{|x|tables[num][3]=x});
+			tables[num][4].clear;
+			(buf.numFrames-3/2).do{|i|
+				buf.get(i*2+3,{|x|swap=x});
+				buf.get(i*2+4,{|x|this.tables[num][4].add((swap*512).asInteger@x)})};
+			this.tables[num][4].postln;
+			buf.numFrames.postln;
+			buf.free;
+            AppClock.sched(0.5,{this.refresh})});
+		^this
+	}
+
+	save{|num,path|
+		Buffer.sendCollection(Server.default,tables[num][0][..tables[num][2]-1],1,-1,
+			{|buf|
+				buf.write(path);
+				buf.free});
+		Buffer.sendCollection(Server.default,[{switch(this.tables[num][1],
+			"---".asSymbol,0.9,
+			\lin,0.1,
+			\exp,0.2,
+			\sin,0.3,
+			\sqr,0.4,
+			\cub,0.5)}.value]++(tables[num][2]/512)++tables[num][3]++{var res=[];this.tables[num][4].do{|p|res.add(p.x/this.tables[num][2]).add(p.y)};res}.value,1,-1,
+		{|buf|
+			buf.write(path++".prop");
+			this.tables[num][4].postln;
+			buf.numFrames.postln;
+			buf.free});
+		^this
+	}
+
 	ar{|num,frq=440,mul=1,add=0|
 		^(PlayBuf.ar(1,this.dynBuffer(num),frq*this.tables[num][2]/SampleRate.ir,loop:1)-0.5*mul+add) }
 	kr{|num,time=1,mul=1,add=0,loop=0,doneAction|
 		if(doneAction.isNil){doneAction=0};
 		^(PlayBuf.kr(1,this.dynBuffer(num),(this.tables[num][2]/ControlRate.ir)/time,loop:loop,doneAction:doneAction)*mul+add) }
 }
-
-
