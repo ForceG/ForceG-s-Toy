@@ -251,6 +251,7 @@ DrawableWaveTable{
 	}
 
 	dynBuffer{|n|var i=n;
+		this.refresh();
 		if(i.isNil){i=tableNumber.value};
 		if(dynBuffer[i].isNil){dynBuffer[i]=this.asBuffer(i)};
 		if(dynBuffer[i].bufnum.isNil){dynBuffer[i]=this.asBuffer(i)};
@@ -364,35 +365,37 @@ DrawableWaveTable{
 				0.3,{this.tables[num][1]=\sin},
 				0.4,{this.tables[num][1]=\sqr},
 				0.5,{this.tables[num][1]=\cub})});
-			buf.get(1,{|x|tables[num][2]=x*512});
+			buf.get(1,{|x|tables[num][2]=(x*512).round.asInteger});
 			buf.get(2,{|x|tables[num][3]=x});
-			tables[num][4].clear;
+			tables[num][4]=[];
 			(buf.numFrames-3/2).do{|i|
-				buf.get(i*2+3,{|x|swap=x});
-				buf.get(i*2+4,{|x|this.tables[num][4].add((swap*512).asInteger@x)})};
-			this.tables[num][4].postln;
-			buf.numFrames.postln;
-			buf.free;
-            AppClock.sched(0.5,{this.refresh})});
+				buf.get(i*2+3,{|x|swap=x*this.tables[num][2]});
+				buf.get(i*2+4,{|x|this.tables[num][4]=this.tables[num][4].add(swap@x)})};
+			AppClock.sched(0.5,{var swap=this.tableNumber.value;
+				this.tableNumber.value=num;
+				this.refresh;
+				this.tableNumber.value=swap;
+				this.refresh})});
 		^this
 	}
 
-	save{|num,path|
+	save{|num,path|var addPoints=[];
 		Buffer.sendCollection(Server.default,tables[num][0][..tables[num][2]-1],1,-1,
 			{|buf|
 				buf.write(path);
 				buf.free});
+		tables[num][4].do{|p|addPoints=addPoints.add(p.x/this.tables[num][2]); addPoints=addPoints.add(p.y)};
 		Buffer.sendCollection(Server.default,[{switch(this.tables[num][1],
 			"---".asSymbol,0.9,
 			\lin,0.1,
 			\exp,0.2,
 			\sin,0.3,
 			\sqr,0.4,
-			\cub,0.5)}.value]++(tables[num][2]/512)++tables[num][3]++{var res=[];this.tables[num][4].do{|p|res.add(p.x/this.tables[num][2]).add(p.y)};res}.value,1,-1,
+			\cub,0.5)}.value]++(tables[num][2]/512)++tables[num][3]++addPoints,1,-1,
 		{|buf|
 			buf.write(path++".prop");
-			this.tables[num][4].postln;
-			buf.numFrames.postln;
+			this.tables[num][4];
+			buf.numFrames;
 			buf.free});
 		^this
 	}
