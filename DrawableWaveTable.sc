@@ -357,7 +357,7 @@ DrawableWaveTable{
 				buf.get(i,{|val|tables[num][0][i]=val})};
 			buf.free;
 			AppClock.sched(0.5,{this.refresh})});
-		Buffer.read(server,path++".prop",action:{|buf|var swap;
+		{Buffer.read(server,path++".prop",action:{|buf|var swap;
 			buf.get(0,{|x|switch(((x*10).round/10),
 				0.9,{this.tables[num][1]="---".asSymbol},
 				0.1,{this.tables[num][1]=\lin},
@@ -375,7 +375,7 @@ DrawableWaveTable{
 				this.tableNumber.value=num;
 				this.refresh;
 				this.tableNumber.value=swap;
-				this.refresh})});
+				this.refresh})})}.try;
 		^this
 	}
 
