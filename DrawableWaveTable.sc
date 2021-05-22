@@ -145,7 +145,7 @@ DrawableWaveTable{
 			newWindow.envs=envs;
 			newWindow.tableNumber.value=tableNumber.value;
 			newWindow.wavText.string=wavText.string;
-			linkedTables.add(newWindow);
+			linkedTables=linkedTables.add(newWindow);
 			newWindow.linkedTables=linkedTables;
 			newWindow.refresh;
 		});
@@ -251,7 +251,7 @@ DrawableWaveTable{
 	}
 
 	dynBuffer{|n|var i=n;
-		this.refresh();
+		this.refresh(i);
 		if(i.isNil){i=tableNumber.value};
 		if(dynBuffer[i].isNil){dynBuffer[i]=this.asBuffer(i)};
 		if(dynBuffer[i].bufnum.isNil){dynBuffer[i]=this.asBuffer(i)};
@@ -315,20 +315,21 @@ DrawableWaveTable{
 				table[i]=table[i]-min/delta}};
 	}
 
-	refresh{
+	refresh{|num|
+		if(num.isNil,{num=tableNumber.value});
 		linkedTables.do{|v|
-			if(v.tableNumber.value==this.tableNumber.value){
-				if(v.table!=tables[tableNumber.value][0]){v.table=tables[tableNumber.value][0]};
-				if(v.interText.string.asSymbol!=tables[tableNumber.value][1]){v.interText.string=tables[tableNumber.value][1]};
-				if(v.samples!=tables[tableNumber.value][2]){v.samples=tables[tableNumber.value][2]};
-				if(v.samplesNum.value!=tables[tableNumber.value][2]){v.samplesNum.value=tables[tableNumber.value][2]};
-				if(v.e.value!=tables[tableNumber.value][3]){v.e.value=tables[tableNumber.value][3]};
+			if(v.tableNumber.value==num){
+				if(v.table!=tables[num][0]){v.table=tables[num][0]};
+				if(v.interText.string.asSymbol!=tables[num][1]){v.interText.string=tables[num][1]};
+				if(v.samples!=tables[num][2]){v.samples=tables[num][2]};
+				if(v.samplesNum.value!=tables[num][2]){v.samplesNum.value=tables[num][2]};
+				if(v.e.value!=tables[num][3]){v.e.value=tables[num][3]};
 				v.userView.refresh}};
-		if(dynBuffer[tableNumber.value].notNil){if(dynBuffer[tableNumber.value].bufnum.notNil){var interTable=table.copy;
-			if(dynBuffer[tableNumber.value].numFrames!=samples){
-				dynBuffer[tableNumber.value].numFrames=samples;
-				dynBuffer[tableNumber.value].alloc({AppClock.sched(0.01,{this.refresh})})};
-			if(e.value>0) {var simpleTable=(this.rdp(tables[tableNumber.value][0],e.value**2,0,samples-1)++tables[tableNumber.value][4]).sort{|a,b|a.x<b.x};
+		if(dynBuffer[num].notNil){if(dynBuffer[num].bufnum.notNil){var interTable=table.copy;
+			if(dynBuffer[num].numFrames!=samples){
+				dynBuffer[num].numFrames=samples;
+				dynBuffer[num].alloc({AppClock.sched(0.01,{this.refresh})})};
+			if(e.value>0) {var simpleTable=(this.rdp(tables[num][0],e.value**2,0,samples-1)++tables[num][4]).sort{|a,b|a.x<b.x};
 				(simpleTable.size-1).do{|i|var p=simpleTable[i],np=simpleTable[i+1];
 					if(p.x==np.x){}
 					{(np.x-p.x).do{|i2|
@@ -341,7 +342,7 @@ DrawableWaveTable{
 							\cub,{var x=i2/(np.x-p.x);interTable[p.x+i2]=  x*(abs(x-1**3).neg+1) +(abs(x**3)*(1-x)) *(np.y-p.y) +p.y},
 					)}}
 			}};
-			dynBuffer[tableNumber.value].setn(0,interTable)}
+			dynBuffer[num].setn(0,interTable)}
 	}}
 
 
@@ -356,7 +357,7 @@ DrawableWaveTable{
 			buf.numFrames.do{|i|
 				buf.get(i,{|val|tables[num][0][i]=val})};
 			buf.free;
-			AppClock.sched(0.5,{this.refresh})});
+			AppClock.sched(0.5,{this.refresh(num)})});
 		{Buffer.read(server,path++".prop",action:{|buf|var swap;
 			buf.get(0,{|x|switch(((x*10).round/10),
 				0.9,{this.tables[num][1]="---".asSymbol},
@@ -371,11 +372,7 @@ DrawableWaveTable{
 			(buf.numFrames-3/2).do{|i|
 				buf.get(i*2+3,{|x|swap=x*this.tables[num][2]});
 				buf.get(i*2+4,{|x|this.tables[num][4]=this.tables[num][4].add(swap@x)})};
-			AppClock.sched(0.5,{var swap=this.tableNumber.value;
-				this.tableNumber.value=num;
-				this.refresh;
-				this.tableNumber.value=swap;
-				this.refresh})})}.try;
+			AppClock.sched(0.5,{this.refresh(num)})})}.try;
 		^this
 	}
 
