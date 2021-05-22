@@ -238,7 +238,7 @@ DrawableWaveTable{
 		^Buffer.sendCollection(server,tables[argN][0][..tables[argN][2]-1],1)
 	}
 
-	asEnv{|t=1,n|var curve=\hold,lastP=0,levels=[],times=[],
+	asEnv{|n,t=1|var curve=\hold,lastP=0,levels=[],times=[],
 		argN=if(n.isNil){n=tableNumber.value}{n},
 		newTable = (this.rdp(tables[tableNumber.value][0],e.value**2,0,samples-1)++tables[tableNumber.value][4]).sort{|a,b|a.x<b.x};
 		if(tables[argN][1].asSymbol!="---".asSymbol){
