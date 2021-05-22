@@ -147,6 +147,7 @@ DrawableWaveTable{
 			newWindow.wavText.string=wavText.string;
 			linkedTables=linkedTables.add(newWindow);
 			newWindow.linkedTables=linkedTables;
+			newWindow.dynBuffer=dynBuffer;
 			newWindow.refresh;
 		});
 
@@ -214,7 +215,7 @@ DrawableWaveTable{
 					}}};
 					this.lastDrawPos=(x@y)
 				}{this.lastDrawPos=nil};
-				this.refresh()};};
+				this.refresh};};
 
 		userView.mouseDownAction={|v,x,y,mod,bn|if(bn==0){but0=true}};
 
@@ -250,12 +251,16 @@ DrawableWaveTable{
 		^Env(levels,times*t/tables[tableNumber.value][2],curve)
 	}
 
-	dynBuffer{|n|var i=n;
-		this.refresh(i);
-		if(i.isNil){i=tableNumber.value};
-		if(dynBuffer[i].isNil){dynBuffer[i]=this.asBuffer(i)};
-		if(dynBuffer[i].bufnum.isNil){dynBuffer[i]=this.asBuffer(i)};
-		^dynBuffer[i]
+	dynBuffer{|n|
+		this.refresh(n);
+		if(n.isNil){n=tableNumber.value};
+		if(dynBuffer[n].isNil){dynBuffer[n]=this.asBuffer(n)};
+		if(dynBuffer[n].bufnum.isNil){dynBuffer[n]=this.asBuffer(n)};
+		^dynBuffer[n]
+	}
+
+	dynBuffer_{|buffers|
+		dynBuffer=buffers;
 	}
 
 	rdp {|waveTable,e,p1=0,p2=nil,loop=false,final=true|var m,n,newTable=[], maxDist=0,furthestI=p1;
@@ -325,10 +330,10 @@ DrawableWaveTable{
 				if(v.samplesNum.value!=tables[num][2]){v.samplesNum.value=tables[num][2]};
 				if(v.e.value!=tables[num][3]){v.e.value=tables[num][3]};
 				v.userView.refresh}};
-		if(dynBuffer[num].notNil){if(dynBuffer[num].bufnum.notNil){var interTable=table.copy;
+		if(dynBuffer[num].notNil){if(dynBuffer[num].bufnum.notNil){var interTable=tables[num][0].copy;
 			if(dynBuffer[num].numFrames!=samples){
 				dynBuffer[num].numFrames=samples;
-				dynBuffer[num].alloc({AppClock.sched(0.01,{this.refresh})})};
+				dynBuffer[num].alloc({AppClock.sched(0.01,{this.refresh(num)})})};
 			if(e.value>0) {var simpleTable=(this.rdp(tables[num][0],e.value**2,0,samples-1)++tables[num][4]).sort{|a,b|a.x<b.x};
 				(simpleTable.size-1).do{|i|var p=simpleTable[i],np=simpleTable[i+1];
 					if(p.x==np.x){}

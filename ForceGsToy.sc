@@ -1,3 +1,5 @@
+// busses: \knobXY \sliderN \PadNXY \buttonXY \ioButtonXY \sweeperN
+
 ForceGsToy{
 	var <bus,<window,<table,<knob,<slider,<pad,<padx,<pady,<button,lastMousePos,<buttonDownAction,<buttonUpAction,<ioButtonAction,<sweepAction;
 
@@ -24,8 +26,8 @@ ForceGsToy{
 		sweepAction=Dictionary(0);
 
 		32.do({|i|var knob;
-			bus=bus[asSymbol("knob"++floor(i/8).asInteger++(i%8))]=Bus.control;
-			knob=EZKnob(window,Rect(i%8*50,floor(i/8)*70,50,70),action:{|knob|bus[asSymbol("knob"++floor(i/8).asInteger++(i%8))].set(knob.value)});
+			bus=bus[asSymbol("knob"++(i%8)++floor(i/8).asInteger)]=Bus.control;
+			knob=EZKnob(window,Rect(i%8*50,floor(i/8)*70,50,70),action:{|knob|bus[asSymbol("knob"++(i%8)++floor(i/8).asInteger)].set(knob.value)});
 			knob.setColors(
 				nil,nil,Color.grey(0.25),nil,Color.hsv(1/8*(i%8),0.5,1),
 				background:Color.black,
