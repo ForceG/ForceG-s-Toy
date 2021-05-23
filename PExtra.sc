@@ -44,7 +44,7 @@ Ptab : Pseq{
 			lastTabTime=clock.beats
 		}{
 			var newTime=clock.beats;
-			this.list=list.add(newTime-lastTabTime);
+			this.list=this.list.add(newTime-lastTabTime);
 			lastTabTime=newTime
 		};
 		if(autoFix.notNil){this.fix(autoFix)};
@@ -60,7 +60,9 @@ Ptab : Pseq{
 		^this
 	}
 
-	reset{ this.list=[]	}
+	reset{ this.list=[];
+		lastTabTime=nil;
+	}
 }
 
 Pin : Prout{
