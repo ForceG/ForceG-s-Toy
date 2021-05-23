@@ -238,7 +238,7 @@ DrawableWaveTable{
 		^Buffer.sendCollection(server,tables[argN][0][..tables[argN][2]-1],1)
 	}
 
-	fromBuffer{|buf,n,frames=128,server|var
+	fromBuffer{|buf,n,frames=128|var
 		argN=if(n.isNil){tableNumber.value}{n};
 		tables[argN][2]=frames;
 		buf.getn(0,buf.numFrames,{|t|frames.do{|i|tables[argN][0][i]=t[(i/frames*(buf.numFrames-1)).roundUp];AppClock.sched(0.01,{this.refresh(argN)})}});
