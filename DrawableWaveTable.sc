@@ -240,7 +240,6 @@ DrawableWaveTable{
 
 	fromBuffer{|buf,n,frames=128,server|var
 		argN=if(n.isNil){tableNumber.value}{n};
-		if(server.isNil){server=Server.default};
 		tables[argN][2]=frames;
 		buf.getn(0,buf.numFrames,{|t|frames.do{|i|tables[argN][0][i]=t[(i/frames*(buf.numFrames-1)).roundUp];AppClock.sched(0.01,{this.refresh(argN)})}});
 		^this
