@@ -238,6 +238,14 @@ DrawableWaveTable{
 		^Buffer.sendCollection(server,tables[argN][0][..tables[argN][2]-1],1)
 	}
 
+	fromBuffer{|buf,n,frames=128,server|var
+		argN=if(n.isNil){tableNumber.value}{n};
+		if(server.isNil){server=Server.default};
+		tables[argN][2]=frames;
+		buf.getn(0,buf.numFrames,{|t|frames.do{|i|tables[argN][0][i]=t[(i/frames*(buf.numFrames-1)).roundUp];AppClock.sched(0.01,{this.refresh(argN)})}});
+		^this
+	}
+
 	asEnv{|n,t=1|var curve=\hold,lastP=0,levels=[],times=[],
 		argN=if(n.isNil){n=tableNumber.value}{n},
 		newTable = (this.rdp(tables[tableNumber.value][0],e.value**2,0,samples-1)++tables[tableNumber.value][4]).sort{|a,b|a.x<b.x};
