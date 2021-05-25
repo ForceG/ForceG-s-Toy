@@ -1,3 +1,8 @@
+/*
+Created by Force_G                ( https://github.com/ForceG/ForceG-s-Toy )
+Enjoy!
+*/
+
 Pxo{
 	*new{|string,repeats=inf,beatsPerBar=8|var out=[],delta=0;
 		string.do({|letter|

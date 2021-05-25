@@ -15,6 +15,13 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License along
 with this program; if not, write to the Free Software Foundation, Inc.,
 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+
+
+
+
+Version 0.1
+
+Updates available at https://github.com/ForceG/ForceG-s-Toy
 */
 
 DrawableWaveTable{
@@ -433,4 +440,44 @@ DrawableWaveTable{
 	kr{|num,time=1,mul=1,add=0,loop=0,doneAction|
 		if(doneAction.isNil){doneAction=0};
 		^(PlayBuf.kr(1,this.dynBuffer(num),(this.tables[num][2]/ControlRate.ir)/time,loop:loop,doneAction:doneAction)*mul+add) }
+
+
+	set{|num,i,val|
+		tables[num][0][i] = val.clip(0,1);
+		this.refresh;
+	}
+
+	setn{|num,i,count,func|
+		count.do{|c|
+			tables[num][0][i+c] = func.(i+c).clip(0,1);
+		};
+		this.refresh;
+	}
+
+	setAll{|num,func,interval,y_range|
+		if(interval.isNil){interval=[0,1]};
+		if(y_range.isNil){y_range=[0,1]};
+		tables[num][2].do{|i|
+			tables[num][0][i] = ( func.(i/tables[num][2]*(interval[1]-interval[0])+interval[0]) -y_range[0]/(y_range[1]-y_range[0]) ).clip(0,1);
+		};
+		this.refresh;
+	}
+
+	get{|num,i|
+		^tables[num][0][i]
+	}
+
+	getn{|num,i,count|var list=[];
+		count.do{|c|
+			list=list.add(tables[num][0][i+c]);
+		};
+		^list
+	}
+
+	getAll{|num|var list=[];
+		tables[num][2].do{|c|
+			list=list.add(tables[num][0][c]);
+		};
+		^list
+	}
 }
