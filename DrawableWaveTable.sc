@@ -19,7 +19,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 
 
-Version 0.1
+Version 0.1a
 
 Updates available at https://github.com/ForceG/ForceG-s-Toy
 */
@@ -444,14 +444,14 @@ DrawableWaveTable{
 
 	set{|num,i,val|
 		tables[num][0][i] = val.clip(0,1);
-		this.refresh;
+		this.refresh(num);
 	}
 
 	setn{|num,i,count,func|
 		count.do{|c|
 			tables[num][0][i+c] = func.(i+c).clip(0,1);
 		};
-		this.refresh;
+		this.refresh(num);
 	}
 
 	setAll{|num,func,interval,y_range|
@@ -460,7 +460,7 @@ DrawableWaveTable{
 		tables[num][2].do{|i|
 			tables[num][0][i] = ( func.(i/tables[num][2]*(interval[1]-interval[0])+interval[0]) -y_range[0]/(y_range[1]-y_range[0]) ).clip(0,1);
 		};
-		this.refresh;
+		this.refresh(num);
 	}
 
 	get{|num,i|
