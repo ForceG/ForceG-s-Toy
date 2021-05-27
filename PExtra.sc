@@ -30,43 +30,76 @@ P0f{
 
 
 Ptab : Pseq{
-	var dict,lastTabTime,<>clock,<>autoFix;
+	var dict,lastTabTime,<>clock,<>autoFix,<>sync,sync_time,synced;
 
-	*new{|autoFix=nil,repeats=inf,clock=nil|
+	*new{|autoFix=nil,sync=\near,repeats=inf,clock=nil|
 		if(clock.isNil){clock=TempoClock.default};
-		^super.new([nil],repeats).init(autoFix,clock)
+		^super.new([nil],repeats).init(autoFix,clock,sync)
 	}
 
-	init{|argFix,argClock|
+	init{|argFix,argClock,argSync|
 		this.list=[];
 		autoFix=argFix;
-		clock=argClock
+		clock=argClock;
+		sync=argSync;
+		sync_time=0;
+		synced=false;
 		^this
 	}
 
 	tab{
 		if(lastTabTime.isNil){
-			lastTabTime=clock.beats
+			lastTabTime=clock.beats;
 		}{
 			var newTime=clock.beats;
 			this.list=this.list.add(newTime-lastTabTime);
-			lastTabTime=newTime
+			lastTabTime=newTime;
 		};
-		if(autoFix.notNil){this.fix(autoFix)};
+		if((autoFix.notNil).and(list.size>0)){
+			if((sync==\early).or((sync==\near).and((list[list.size-1]+sync_time%autoFix)<(autoFix/2))))
+			{
+				sync_time=(list[list.size-1]%autoFix)+sync_time;
+				if(sync_time>autoFix){sync_time=sync_time%autoFix; if(synced!=true){list[list.size-1]=list[list.size-1]+autoFix}};
+				list[list.size-1]=floor(list[list.size-1]/autoFix)*autoFix;
+				if(synced){synced=false}
+			}{
+				if((list[list.size-1]%autoFix)+sync_time>autoFix){sync_time=(sync_time+list[list.size-1])%autoFix; list[list.size-1]=floor(list[list.size-1]/autoFix+1)*autoFix; synced=true}
+				{
+					sync_time=sync_time+(list[list.size-1]%autoFix);
+					if((synced.not).and(list[list.size-1]%autoFix>0))
+					{list[list.size-1]=floor(list[list.size-1]/autoFix+1)*autoFix; synced=true}
+					{list[list.size-1]=floor(list[list.size-1]/autoFix  )*autoFix}
+				}
+			}
+		};
 		^this
 	}
 
-	fix{|step,sync=\near|var newList;
-		switch(sync,
-			\early,{ list.do{|e|newList=newList.add(floor(e/step)*step)} },
-			\late,{ list.do{|e|if(e%step!=0){newList=newList.add(floor(e+step/step)*step)}{newList=newList.add(e)} } },
-			\near,{ list.do{|e|newList=newList.add(floor((step/2+e)/step)*step)} } );
-		if(newList.size!=0){this.list=newList};
+	fix{|step,sync=\near|var sync_time=0,synced=false;
+		list.size.do{|i|
+			if((sync==\early).or((sync==\near).and((list[i]+sync_time%step)<(step/2))))
+			{
+				sync_time=(list[i]%step)+sync_time;
+				if(sync_time>step){sync_time=sync_time%step; if(synced!=true){list[i]=list[i]+step}};
+				list[i]=floor(list[i]/step)*step;
+				if(synced){synced=false}
+			}{
+				if((list[i]%step)+sync_time>step){sync_time=(sync_time+list[i])%step; list[i]=floor(list[i]/step+1)*step; synced=true}
+				{
+					sync_time=sync_time+(list[i]%step);
+					if((synced.not).and(list[i]%step>0))
+					{list[i]=floor(list[i]/step+1)*step; synced=true}
+					{list[i]=floor(list[i]/step  )*step}
+				}
+			}
+		};
 		^this
 	}
 
 	reset{ this.list=[];
 		lastTabTime=nil;
+		sync_time=0;
+		synced=false;
 	}
 }
 
